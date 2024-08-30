@@ -35,9 +35,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.robin.kmp.customIcons.CustomIcon
 import com.robin.kmp.model.Reciter
 import com.robin.kmp.networking.RecitersClient
+import com.robin.kmp.screens.DetailScreen
 import com.robin.kmp.screens.QuranReciters
 import com.robin.kmp.util.NetworkError
 import com.robin.kmp.util.onError
@@ -53,58 +57,56 @@ import kotlinx.coroutines.launch
 @Preview
 fun App(client: RecitersClient) {
     MaterialTheme {
-        var isLoading by remember { mutableStateOf(false) }
-        var reciters by remember { mutableStateOf(emptyList<Reciter>()) }
-        var errorMessage by remember { mutableStateOf<NetworkError?>(null) }
-        val scope = rememberCoroutineScope()
-        Scaffold (topBar = {
-            TopAppBar(
-                elevation = 8.dp,
-                modifier = Modifier.background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color(0xffCD0000), Color(0xffE70000), Color(0xffCD0000))
-                    )
-                ),
-                backgroundColor = Color(0xffCD0000),
-                title = {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Quran Reciters", fontSize = 18.sp,color = Color.White)
-                    }
-                }
-            )
-        }){
-            Box(modifier = Modifier.fillMaxSize().background(color = Color(0xffFFFFFF)).padding(10.dp), contentAlignment = Alignment.Center) {
-                LaunchedEffect(Unit) {
-                    scope.launch {
-                        isLoading = true
-                        errorMessage = null
-                        client.getReciters()
-                            .onSuccess {
-                                reciters = it.reciters
-                            }
-                            .onError { error ->
-                                errorMessage = error
-                            }
-                        isLoading = false
+        val navController = rememberNavController()
 
-                    }
-                }
-                if (isLoading) {
-                    CircularProgressIndicator()
+        NavHost(navController = navController, startDestination = "reciters") {
+            composable("reciters") {
+                var isLoading by remember { mutableStateOf(false) }
+                var reciters by remember { mutableStateOf(emptyList<Reciter>()) }
+                var errorMessage by remember { mutableStateOf<NetworkError?>(null) }
+                val scope = rememberCoroutineScope()
+                Box(modifier = Modifier.fillMaxSize().background(color = Color(0xffFFFFFF)).padding(10.dp), contentAlignment = Alignment.Center) {
+                    LaunchedEffect(Unit) {
+                        scope.launch {
+                            isLoading = true
+                            errorMessage = null
+                            client.getReciters()
+                                .onSuccess {
+                                    reciters = it.reciters
+                                }
+                                .onError { error ->
+                                    errorMessage = error
+                                }
+                            isLoading = false
 
-                } else {
-                    if (errorMessage != null) {
-                        Text(errorMessage!!.name)
+                        }
+                    }
+                    if (isLoading) {
+                        CircularProgressIndicator()
+
                     } else {
-                        QuranReciters(reciters)
-                    }
+                        if (errorMessage != null) {
+                            Text(errorMessage!!.name)
+                        } else {
+                            QuranReciters( reciters){
+                                reciter ->
+                                navController.navigate("detail/${reciter.name}")
+                            }
+                        }
 
+                    }
+                }
+
+            }
+
+            composable("detail/{name}") {
+                val name = it.arguments?.getString("name") ?: ""
+                DetailScreen(name) {
+                    navController.navigateUp()
                 }
             }
         }
+
 
 
     }

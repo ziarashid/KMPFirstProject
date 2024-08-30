@@ -51,6 +51,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
 
             implementation(libs.bundles.ktor)
+
+            implementation(libs.androidx.navigation.compose)
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)
