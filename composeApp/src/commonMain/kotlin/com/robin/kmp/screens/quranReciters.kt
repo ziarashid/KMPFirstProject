@@ -68,7 +68,7 @@ fun QuranReciters(reciters: List<Reciter>,onItemClick: (Reciter) -> Unit) {
             }
         )
     }){
-        Box(modifier = Modifier.fillMaxSize().background(color = Color(0xffFFFFFF)).padding(10.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxSize().background(color = Color(0xffFFFFFF)), contentAlignment = Alignment.Center) {
                     if(reciters != null&&reciters.size>0){
                         Column(
                             modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())

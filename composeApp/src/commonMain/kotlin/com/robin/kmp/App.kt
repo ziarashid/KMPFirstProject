@@ -65,7 +65,7 @@ fun App(client: RecitersClient) {
                 var reciters by remember { mutableStateOf(emptyList<Reciter>()) }
                 var errorMessage by remember { mutableStateOf<NetworkError?>(null) }
                 val scope = rememberCoroutineScope()
-                Box(modifier = Modifier.fillMaxSize().background(color = Color(0xffFFFFFF)).padding(10.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxSize().background(color = Color(0xffFFFFFF)), contentAlignment = Alignment.Center) {
                     LaunchedEffect(Unit) {
                         scope.launch {
                             isLoading = true
@@ -90,7 +90,7 @@ fun App(client: RecitersClient) {
                         } else {
                             QuranReciters( reciters){
                                 reciter ->
-                                navController.navigate("detail/${reciter.name}")
+                                navController.navigate("detail/${reciter.name}/${urlEncode(reciter.Server)}/${reciter.suras}")
                             }
                         }
 
@@ -99,9 +99,11 @@ fun App(client: RecitersClient) {
 
             }
 
-            composable("detail/{name}") {
-                val name = it.arguments?.getString("name") ?: ""
-                DetailScreen(name) {
+            composable("detail/{name}/{server}/{surahs}") {
+            val name = it.arguments?.getString("name") ?: ""
+            val server = it.arguments?.getString("server") ?: ""
+            val surahs = it.arguments?.getString("surahs") ?: ""
+                DetailScreen(name,server,surahs) {
                     navController.navigateUp()
                 }
             }
@@ -111,3 +113,23 @@ fun App(client: RecitersClient) {
 
     }
 }
+fun urlEncode(url: String): String = url
+    .replace(" ", "%20")
+    .replace("!", "%21")
+    .replace("#", "%23")
+    .replace("$", "%24")
+    .replace("&", "%26")
+    .replace("'", "%27")
+    .replace("(", "%28")
+    .replace(")", "%29")
+    .replace("*", "%2A")
+    .replace("+", "%2B")
+    .replace(",", "%2C")
+    .replace("/", "%2F")
+    .replace(":", "%3A")
+    .replace(";", "%3B")
+    .replace("=", "%3D")
+    .replace("?", "%3F")
+    .replace("@", "%40")
+    .replace("[", "%5B")
+    .replace("]", "%5D")
